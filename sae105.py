@@ -106,12 +106,20 @@ def appelNombre_Villes_Indicatif(indTel, unelisteInfo):
     :param unelisteInfo: liste des noms de villes
     :return: nbVilles = nombre de villes
     """
-    nbVilles = 0
-    for i in unelisteInfo:
-        if i[0] == indTel:
-            nbVilles += 1
-    return nbVilles
-
+    if indTel == 1:
+        listeDept = [75, 77, 78, 91, 92, 93, 94, 95]
+    elif indTel == 2:
+        listeDept = ["14","18","22","27","28","29","35","36","37","41","45","49","50","53","56","72","85","974","976"]
+    elif indTel == 3:
+        listeDept = ["02","08","10","21","25","39","51","52","54","55","57","58","59","60","62","67","68","70","71","80","88","89","90"]
+    elif indTel == 4:
+        listeDept=["01","03","04","05","06","07","11","13","15","2A","2B","26","30","34","38","42","43","48","63","66","69","73","74","83","84"]
+    elif indTel == 5:
+        listeDept = ["09","12","16","17","19","23","24","31","32","33","40","46","47","64","65","79","81","82","86","87","971","972","973","975","977","978"]
+    else:
+        print("Erreur de saisie")
+        return
+    return extract_villes_depart_indicatif(listeDept, unelisteInfo)
 #--------------------------------------------------------
 # Fonction extract_villes_depart_indicatif(listeInfo)
 #--------------------------------------------------------
@@ -124,11 +132,12 @@ def extract_villes_depart_indicatif(listeDept, listeInfo):
     :param listeInfo: liste des noms de villes
     :return: nbVilles = nombre de villes
     """
+    nbVilles = 0
+    for i in listeInfo:
+        if i[0] in listeDept:
+            nbVilles += 1
+    return nbVilles
 
-
-"""
-    A compléter
-"""
 
 #--------------------------------------------------------
 # Procédure qui permet d'appeler la fonction
@@ -369,11 +378,11 @@ while fini == False:
     if choix == '1':
         # Pour débuter il faut extraire des informations du fichier CSV
         listeInfo = appelExtractionVilles()
-        #=====================================
-        """
-        A compléter en demandant l'indicatif Téléphonique
-        Puis faire un appel à la procédure : appelNombre_Villes_Indicatif(...)
-        """
+        indicatif = int(input("Entrer votre indicatif téléphonique : "))
+        if indicatif<=0 or indicatif>5:
+            print("Indicatif non valide")
+        else:
+            print(f"il y a {appelNombre_Villes_Indicatif(indicatif,listeInfo)} Villes avec l'indicatif {indicatif}")
 
     elif choix == '2':
         print("\n**** Nombre de Villes par Département *****")
