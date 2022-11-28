@@ -2,14 +2,14 @@
 Programme SAE 105: Traitement de données:
 Fichier: ville_france.csv contenant des informations sur les 36700 Villes de France
 BUT1 : Année 2022-2023
-@author: A compléter avec Votre NOM - Prénom - Groupe_TP
+@author: CUVELIER Rémy B1
 """
 # pour afficher la carte avec les villes
-"""
-import folium,branca
-import matplotlib.pyplot as plt
-import math
-"""
+
+#import folium,branca
+#import matplotlib.pyplot as plt
+#import math
+
 
 #-----------------------------------------------------------
 # Fonction qui extrait les 12 informations sur chaque ville
@@ -101,8 +101,16 @@ def extract_info_villes(uneListe):
 #====================================================================
 def appelNombre_Villes_Indicatif(indTel, unelisteInfo):
     """
-        A compléter
+    Fonction qui compte le nombre de villes en fonction de l'indicatif téléphonique
+    :param indTel: indicatif téléphonique
+    :param unelisteInfo: liste des noms de villes
+    :return: nbVilles = nombre de villes
     """
+    nbVilles = 0
+    for i in unelisteInfo:
+        if i[0] == indTel:
+            nbVilles += 1
+    return nbVilles
 
 #--------------------------------------------------------
 # Fonction extract_villes_depart_indicatif(listeInfo)
