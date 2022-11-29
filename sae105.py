@@ -103,23 +103,37 @@ def appelNombre_Villes_Indicatif(indTel, unelisteInfo):
     """
     Fonction qui compte le nombre de villes en fonction de l'indicatif téléphonique
     :param indTel: indicatif téléphonique
-    :param unelisteInfo: liste des noms de villes
-    :return: nbVilles = nombre de villes
+    :param unelisteInfo: liste des villes
     """
-    if indTel == 1:
-        listeDept = [75, 77, 78, 91, 92, 93, 94, 95]
+    #définition de la variable "listeDept" en fonction de l'indicatif téléphonique
+    if indTel == 1: 
+        #liste des département avec l'indicatif 01
+        listeDept = [75, 77, 78, 91, 92, 93, 94, 95] 
+        #appel de la fonction extract_villes_depart_indicatif pour afficher le nombre de villes ayant l'indicatif 01
+        print(f"nombre de villes dans les départements ayant l'indicatif {indTel} = {extract_villes_depart_indicatif(listeDept, unelisteInfo)}")
     elif indTel == 2:
-        listeDept = ["14","18","22","27","28","29","35","36","37","41","45","49","50","53","56","72","85","974","976"]
+        #liste des département avec l'indicatif 02
+        listeDept = [14,18,22,27,28,29,35,36,37,41,45,49,50,53,56,72,85,974,976] 
+        #appel de la fonction extract_villes_depart_indicatif pour afficher le nombre de villes ayant l'indicatif 02
+        print(f"nombre de villes dans les départements ayant l'indicatif {indTel} = {extract_villes_depart_indicatif(listeDept, unelisteInfo)}")
     elif indTel == 3:
-        listeDept = ["02","08","10","21","25","39","51","52","54","55","57","58","59","60","62","67","68","70","71","80","88","89","90"]
+        #liste des département avec l'indicatif 03
+        listeDept = [2,8,10,21,25,39,51,52,54,55,57,58,59,60,62,67,68,70,71,80,88,89,90]
+        #appel de la fonction extract_villes_depart_indicatif pour afficher le nombre de villes ayant l'indicatif 03
+        print(f"nombre de villes dans les départements ayant l'indicatif {indTel} = {extract_villes_depart_indicatif(listeDept, unelisteInfo)}")
     elif indTel == 4:
-        listeDept=["01","03","04","05","06","07","11","13","15","2A","2B","26","30","34","38","42","43","48","63","66","69","73","74","83","84"]
+        #liste des département avec l'indicatif 04
+        listeDept=[1,3,4,5,6,7,11,13,15,"2A","2B",26,30,34,38,42,43,48,63,66,69,73,74,83,84]
+        #appel de la fonction extract_villes_depart_indicatif pour afficher le nombre de villes ayant l'indicatif 04
+        print(f"nombre de villes dans les départements ayant l'indicatif {indTel} = {extract_villes_depart_indicatif(listeDept, unelisteInfo)}") 
     elif indTel == 5:
-        listeDept = ["09","12","16","17","19","23","24","31","32","33","40","46","47","64","65","79","81","82","86","87","971","972","973","975","977","978"]
+        #liste des département avec l'indicatif 05
+        listeDept = [9,12,16,17,19,23,24,31,32,33,40,46,47,64,65,79,81,82,86,87,971,972,973,975,977,978]
+        #appel de la fonction extract_villes_depart_indicatif pour afficher le nombre de villes ayant l'indicatif 05
+        print(f"nombre de villes dans les départements ayant l'indicatif {indTel} = {extract_villes_depart_indicatif(listeDept, unelisteInfo)}")
     else:
+        #affiche qu'il y a une erreur si l'indicatif téléphonique n'existe pas
         print("Erreur de saisie")
-        return
-    return extract_villes_depart_indicatif(listeDept, unelisteInfo)
 #--------------------------------------------------------
 # Fonction extract_villes_depart_indicatif(listeInfo)
 #--------------------------------------------------------
@@ -132,10 +146,19 @@ def extract_villes_depart_indicatif(listeDept, listeInfo):
     :param listeInfo: liste des noms de villes
     :return: nbVilles = nombre de villes
     """
+    #initialisation de la variable nbVilles à 0
     nbVilles = 0
+    #boucle qui parcours la liste "listeInfo" 
     for i in listeInfo:
+        #test si le département de la ville est dans la liste des départements
         if i[0] in listeDept:
-            nbVilles += 1
+            #incrémentation de la variable nbVilles
+            nbVilles += 1 
+            #création de la string a écrire dans le fichier
+            ligne=str(nbVilles)+" "+str(i[1])+" "+"("+str(i[0])+")"+"\n"
+            #écriture dans le fichier
+            with open("SO05.txt", "a", encoding="utf-8") as fichier:
+	            fichier.write(ligne)
     return nbVilles
 
 
@@ -181,6 +204,24 @@ def extract_villes_NumDepart(numDept, listeVilles):
     :param listeVilles: liste des noms de villes
     :return: nbVilles = nombre de villes du département
     """
+    # initialisation de la variable nbVilles à 0
+    nbVilles = 0
+    #création de la liste des villes du département
+    listeInfoDept = []
+    # boucle qui parcours la liste "listeInfo"
+    for i in listeVilles:
+        # test si la ville appartient au département
+        if i[0] == numDept:
+            # incrémentation de la variable nbVilles
+            nbVilles += 1
+            # ajout de la ville dans la liste des villes du département
+            listeInfoDept.append(i)
+            # création de la string a écrire dans le fichier
+            ligne = str(nbVilles) + " " + str(i[1]) + " " + "(" + str(i[0]) + ")" + "\n"
+            # écriture dans le fichier
+            with open("SO05.txt", "a", encoding="utf-8") as fichier:
+                fichier.write(ligne)
+    return nbVilles, listeInfoDept
 
 
 """
@@ -378,11 +419,10 @@ while fini == False:
     if choix == '1':
         # Pour débuter il faut extraire des informations du fichier CSV
         listeInfo = appelExtractionVilles()
+        #on demande à l'utilisateur de saisir un indicatif téléphonique
         indicatif = int(input("Entrer votre indicatif téléphonique : "))
-        if indicatif<=0 or indicatif>5:
-            print("Indicatif non valide")
-        else:
-            print(f"il y a {appelNombre_Villes_Indicatif(indicatif,listeInfo)} Villes avec l'indicatif {indicatif}")
+        #on appelle la procédure qui affiche le nombre de villes en fonction de l'indicatif téléphonique
+        appelNombre_Villes_Indicatif(indicatif,listeInfo)
 
     elif choix == '2':
         print("\n**** Nombre de Villes par Département *****")
