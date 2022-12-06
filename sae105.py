@@ -6,7 +6,7 @@ BUT1 : Année 2022-2023
 """
 # pour afficher la carte avec les villes
 
-#import folium,branca
+import folium,branca
 #import matplotlib.pyplot as plt
 #import math
 
@@ -153,7 +153,8 @@ def extract_villes_depart_indicatif(listeDept, listeInfo):
         #test si le département de la ville est dans la liste des départements
         if i[0] in listeDept:
             #incrémentation de la variable nbVilles
-            nbVilles += 1 
+            nbVilles += 1
+        #test si le département de la ville est dans la liste des départements de la zone 05
         if i[0] in dep05:
             #ajout dans la string des villes à écrire dans le fichier
             ligne+=str(indice_ville)+" "+str(i[1])+" "+"("+str(i[0])+")"+"\n"
@@ -222,7 +223,7 @@ def extract_villes_NumDepart(listeInfo):
             # ajout de la ville dans la liste des villes du département
             listeVilles.append(i)
     # écriture dans le fichier
-    with open(f"villes_{numDept}.txt", "a", encoding="utf-8") as fichier:
+    with open(f"villes_{numDept}.txt", "w", encoding="utf-8") as fichier:
         for i in listeVilles:
             fichier.write(str(i) + "\n")
     return nbVilles, listeVilles
@@ -231,10 +232,27 @@ def extract_villes_NumDepart(listeInfo):
 # Fonctions Utiles pour le Tri Bulle lié à la POPULATION
 # ================================================
 
+def unPassage(tab, dernier):
+    mouvement=0
+    for i in range(0,dernier-1):
+        if tab[i][3]>tab[i+1][3]:
+            temp1=tab[i] 
+            temp2=tab[i+1]
+            tab[i]=temp2
+            tab[i+1]=temp1
+            mouvement+=1
+    return tab,mouvement
+def triBulle(liste):
+    dernier=len(liste)
+    move=1
+    while dernier!=0 and move>0:
+        liste=unPassage(liste, dernier)[0]
+        move=unPassage(liste, dernier)[1]
+        dernier-=1
+    return liste
 
-def MinMax5_villes_Habitants(lstVillesDepart):
+def MinMax5_villes_Habitants():
     """
-
     :param numDept:
     :param lstVillesDepart:
 
@@ -244,26 +262,79 @@ def MinMax5_villes_Habitants(lstVillesDepart):
         *** On IMPOSE le TRI BULLE vu au TP7 ****
         puis extraire les 5 premières valeurs
     """
-
-"""
-    A compléter
-"""
+    #initialisation de la variable numDept à 12
+    numDept=12
+    #appelle de la fonction qui extrait les villes du département 12
+    lstVillesDepart=extract_villes_NumDepart(listeInfo)[1]
+    #appelle de la fonction qui trie les villes du département 12 en fonction de la population de 2010
+    villes=triBulle(lstVillesDepart)
+    #affiche les 5 première valeur de la liste "villes"
+    print("5 villes ayant le moins d'habitants :")
+    # écriture dans le fichier
+    with open(f"Min5Villes_{numDept}.txt", "w", encoding="utf-8") as fichier:
+        for i in range(0,5):
+            fichier.write(str(villes[i]) + "\n")
+            print(villes[i])
+    print("5 villes ayant le plus d'habitants :")
+    with open(f"Top5Villes_{numDept}.txt", "w", encoding="utf-8") as fichier:
+        for i in range(len(villes)-1,len(villes)-6,-1):
+            fichier.write(str(villes[i]) + "\n")
+            print(villes[i])
 
 #-------------------------------------------------------------------------
 # Procédure qui permet d'afficher sur une carte OpenStreetMap
 # les 10 villes (5 ayant la population MAX, et 5 ayant la population MIN)
 #-------------------------------------------------------------------------
-def mapTenVilles(maxPopul, minPopul):
+def mapTenVilles():#maxPopul, minPopul
     """
 
     :param maxPop: fichier contenant les 5 villes de forte densité
     :param minPop: fichier contenant les 5 villes de faible densité
     :return:
     """
+    numDept=12
+    #récupérer le contenue du fichier "Top5Villes_12.txt"
+    with open(f"Top5Villes_{numDept}.txt", "r", encoding="utf-8") as fichier:
+        maxPopultemp=fichier.readlines()
+    with open(f"Min5Villes_{numDept}.txt", "r", encoding="utf-8") as fichier:
+        minPopultemp=fichier.readlines()
+    maxPopul=[]
+    minPopul=[]
+    for i in maxPopultemp:
+        maxPopul.append(i.split(','))
+    for i in minPopultemp:
+        minPopul.append(i.split(','))
+    #création de la carte
+    stations=[]
+    lon=[]
+    lat=[]
+    dens=[]
+    for i in maxPopul:
+        stations.append(i[1])
+        dens.append(float(i[6]))
+        lon.append(float(i[8]))
+        lat.append(float(i[9]))
+    for i in minPopul:
+        stations.append(i[1])
+        dens.append(float(i[6]))
+        lon.append(float(i[8]))
+        lat.append(float(i[9]))
+    coords = (46.539758, 2.430331)
+    map1 = folium.Map(location=coords, tiles='OpenStreetMap', zoom_start=6)
+    cm = branca.colormap.LinearColormap(['blue', 'red'], vmin=min(dens), vmax=max(dens))
+    map1.add_child(cm) # add this colormap on the display
 
-    """
-        A compléter
-    """
+    for lati, lng, size, color in zip(lat, lon, dens, dens):
+        folium.CircleMarker(
+            location=[lati, lng],
+            radius=size/100,
+            color=cm(color),
+            fill=True,
+            fill_color=cm(color),
+            fill_opacity=0.6
+        ).add_to(map1)
+    map1.save(outfile='map1.html')
+    print("Traitement terminé")
 
 
 
@@ -435,9 +506,8 @@ while fini == False:
             choixBis = input("votre choix: ")
             if choixBis == '1':
                 print("\nappel de la stat1 : Min/Max Habitants : 5 villes\n")
-                """
-                    A compléter
-                """
+                MinMax5_villes_Habitants()
+                mapTenVilles()
             elif choixBis == '2':
                 print("\nappel de la stat2: Afficher les 10 villes (DENSITE) sur la carte\n")
                 """
