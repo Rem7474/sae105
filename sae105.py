@@ -232,24 +232,6 @@ def extract_villes_NumDepart(listeInfo):
 # Fonctions Utiles pour le Tri Bulle lié à la POPULATION
 # ================================================
 
-def unPassage(tab, dernier):
-    mouvement=0
-    for i in range(0,dernier-1):
-        if tab[i][3]>tab[i+1][3]:
-            temp1=tab[i] 
-            temp2=tab[i+1]
-            tab[i]=temp2
-            tab[i+1]=temp1
-            mouvement+=1
-    return tab,mouvement
-def triBulle(liste):
-    dernier=len(liste)
-    move=1
-    while dernier!=0 and move>0:
-        liste=unPassage(liste, dernier)[0]
-        move=unPassage(liste, dernier)[1]
-        dernier-=1
-    return liste
 
 def MinMax5_villes_Habitants():
     """
@@ -262,6 +244,24 @@ def MinMax5_villes_Habitants():
         *** On IMPOSE le TRI BULLE vu au TP7 ****
         puis extraire les 5 premières valeurs
     """
+    def unPassage(tab, dernier):
+        mouvement=0
+        for i in range(0,dernier-1):
+            if tab[i][3]>tab[i+1][3]:
+                temp1=tab[i] 
+                temp2=tab[i+1]
+                tab[i]=temp2
+                tab[i+1]=temp1
+                mouvement+=1
+        return tab,mouvement
+    def triBulle(liste):
+        dernier=len(liste)
+        move=1
+        while dernier!=0 and move>0:
+            liste=unPassage(liste, dernier)[0]
+            move=unPassage(liste, dernier)[1]
+            dernier-=1
+        return liste
     #initialisation de la variable numDept à 12
     numDept=12
     #appelle de la fonction qui extrait les villes du département 12
@@ -334,7 +334,6 @@ def mapTenVilles():#maxPopul, minPopul
             fill_opacity=0.6
         ).add_to(map1)
     map1.save(outfile='map1.html')
-    print("Traitement terminé")
 
 
 
@@ -348,9 +347,39 @@ def MinMax10Accroissement(lstVillesDepart):
         *** On IMPOSE le TRI BULLE vu au TP7 ****
         puis extraire les 10 premières valeurs et 10 dernières valeurs
     """
-"""
-    A compléter
-"""
+    def unPassage(tab, dernier):
+        mouvement=0
+        for i in range(0,dernier-1):
+            if tab[i][5]-tab[i][4]>tab[i+1][5]-tab[i+1][4]:
+                temp1=tab[i] 
+                temp2=tab[i+1]
+                tab[i]=temp2
+                tab[i+1]=temp1
+                mouvement+=1
+        return tab,mouvement
+    def triBulle(liste):
+        dernier=len(liste)
+        move=1
+        while dernier!=0 and move>0:
+            liste=unPassage(liste, dernier)[0]
+            move=unPassage(liste, dernier)[1]
+            dernier-=1
+        return liste
+    numDept=12
+    #appelle de la fonction qui extrait les villes du département 12
+    VillesDepart=extract_villes_NumDepart(lstVillesDepart)[1]
+    liste = triBulle(VillesDepart)
+    print("10 villes ayant la plus forte baisse de population entre 1999 et 2012 :")
+    with open(f"TopBaisse10Villes_{numDept}.txt", "w", encoding="utf-8") as fichier:
+        for i in range(0,10):
+                print(liste[i][1])
+                fichier.write(str(liste[i][0]) + "," + str(liste[i][1]) + "," + str(liste[i][5]-liste[i][4]) + "\n")
+    print("10 villes ayant la plus forte accroissement de population entre 1999 et 2012 :")
+    with open(f"TopAcc10Villes_{numDept}.txt", "w", encoding="utf-8") as fichier:
+        for i in range(len(liste)-1,len(liste)-11,-1):
+                print(liste[i][1])
+                fichier.write(str(liste[i][0]) + "," + str(liste[i][1]) + "," + str(liste[i][5]-liste[i][4]) + "\n")
+
 
 
 def MinMax5Alt_Dept(lstVillesDepart):
@@ -515,9 +544,7 @@ while fini == False:
                 """
             elif choixBis == '3':
                 print("\nappel de la stat3: ACCROISSEMENT/BAISSE population entre 1999 et 2012\n")
-                """
-                    A compléter
-                """
+                MinMax10Accroissement(listeInfo)
             elif choixBis == '4':
                 print("\nappel de la stat4 : HISTOGRAMME du nombre des Villes par habitants\n")
                 """
