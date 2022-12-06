@@ -101,7 +101,7 @@ def extract_info_villes(uneListe):
 #====================================================================
 def appelNombre_Villes_Indicatif(indTel, unelisteInfo):
     """
-    Fonction qui compte le nombre de villes en fonction de l'indicatif téléphonique
+    Procédure qui compte le nombre de villes en fonction de l'indicatif téléphonique
     :param indTel: indicatif téléphonique
     :param unelisteInfo: liste des villes
     """
@@ -109,31 +109,25 @@ def appelNombre_Villes_Indicatif(indTel, unelisteInfo):
     if indTel == 1: 
         #liste des département avec l'indicatif 01
         listeDept = [75, 77, 78, 91, 92, 93, 94, 95] 
-        #appel de la fonction extract_villes_depart_indicatif pour afficher le nombre de villes ayant l'indicatif 01
-        print(f"nombre de villes dans les départements ayant l'indicatif {indTel} = {extract_villes_depart_indicatif(listeDept, unelisteInfo)}")
     elif indTel == 2:
         #liste des département avec l'indicatif 02
         listeDept = [14,18,22,27,28,29,35,36,37,41,45,49,50,53,56,72,85,974,976] 
-        #appel de la fonction extract_villes_depart_indicatif pour afficher le nombre de villes ayant l'indicatif 02
-        print(f"nombre de villes dans les départements ayant l'indicatif {indTel} = {extract_villes_depart_indicatif(listeDept, unelisteInfo)}")
     elif indTel == 3:
         #liste des département avec l'indicatif 03
         listeDept = [2,8,10,21,25,39,51,52,54,55,57,58,59,60,62,67,68,70,71,80,88,89,90]
-        #appel de la fonction extract_villes_depart_indicatif pour afficher le nombre de villes ayant l'indicatif 03
-        print(f"nombre de villes dans les départements ayant l'indicatif {indTel} = {extract_villes_depart_indicatif(listeDept, unelisteInfo)}")
     elif indTel == 4:
         #liste des département avec l'indicatif 04
         listeDept=[1,3,4,5,6,7,11,13,15,"2A","2B",26,30,34,38,42,43,48,63,66,69,73,74,83,84]
-        #appel de la fonction extract_villes_depart_indicatif pour afficher le nombre de villes ayant l'indicatif 04
-        print(f"nombre de villes dans les départements ayant l'indicatif {indTel} = {extract_villes_depart_indicatif(listeDept, unelisteInfo)}") 
     elif indTel == 5:
         #liste des département avec l'indicatif 05
         listeDept = [9,12,16,17,19,23,24,31,32,33,40,46,47,64,65,79,81,82,86,87,971,972,973,975,977,978]
-        #appel de la fonction extract_villes_depart_indicatif pour afficher le nombre de villes ayant l'indicatif 05
-        print(f"nombre de villes dans les départements ayant l'indicatif {indTel} = {extract_villes_depart_indicatif(listeDept, unelisteInfo)}")
     else:
         #affiche qu'il y a une erreur si l'indicatif téléphonique n'existe pas
         print("Erreur de saisie")
+    #appelle la fonction qui compte le nombre de ville en fonction de l'indicatif téléphonique
+    nbVilles = extract_villes_depart_indicatif(listeDept, unelisteInfo)
+    #affiche le nombre de ville en fonction de l'indicatif téléphonique
+    print(f"nombre de villes dans les départements ayant l'indicatif {indTel} = {nbVilles}")
 #--------------------------------------------------------
 # Fonction extract_villes_depart_indicatif(listeInfo)
 #--------------------------------------------------------
@@ -146,19 +140,28 @@ def extract_villes_depart_indicatif(listeDept, listeInfo):
     :param listeInfo: liste des noms de villes
     :return: nbVilles = nombre de villes
     """
+    #initialisation de la variable contenant la liste des département de la zone 05
+    dep05=[9,12,16,17,19,23,24,31,32,33,40,46,47,64,65,79,81,82,86,87,971,972,973,975,977,978]
     #initialisation de la variable nbVilles à 0
     nbVilles = 0
+    #initialise la string "ligne" à vide
+    ligne = ""
+    #compte le nombre de ville en fonction de l'indicatif téléphonique qui nous ai donné
+    indice_ville=1
     #boucle qui parcours la liste "listeInfo" 
     for i in listeInfo:
         #test si le département de la ville est dans la liste des départements
         if i[0] in listeDept:
             #incrémentation de la variable nbVilles
             nbVilles += 1 
-            #création de la string a écrire dans le fichier
-            ligne=str(nbVilles)+" "+str(i[1])+" "+"("+str(i[0])+")"+"\n"
-            #écriture dans le fichier
-            with open("SO05.txt", "a", encoding="utf-8") as fichier:
-	            fichier.write(ligne)
+        if i[0] in dep05:
+            #ajout dans la string des villes à écrire dans le fichier
+            ligne+=str(indice_ville)+" "+str(i[1])+" "+"("+str(i[0])+")"+"\n"
+            indice_ville+=1
+    #écriture dans le fichier des villes de la zone 05
+    with open("SO05.txt", "w", encoding="utf-8") as fichier:
+	    fichier.write(ligne)
+    #retourne le nombre de ville en fonction de l'indicatif téléphonique
     return nbVilles
 
 
@@ -195,7 +198,7 @@ def rechercheVille(name,listeVilles):
 # --------------------------------------------------------
 # Fonction extract_villes_depart_indicatif(listeInfo)
 # --------------------------------------------------------
-def extract_villes_NumDepart(numDept, listeVilles):
+def extract_villes_NumDepart(listeInfo):
     """
     Fonction qui extrait l'ensemble des villes pour chaque département,
     en fonction du numéro du Département
@@ -204,30 +207,25 @@ def extract_villes_NumDepart(numDept, listeVilles):
     :param listeVilles: liste des noms de villes
     :return: nbVilles = nombre de villes du département
     """
+    #initioalisation de la variable numDept à 12, donc ce n'est pas un parametre d'entrée
+    numDept=12
     # initialisation de la variable nbVilles à 0
     nbVilles = 0
     #création de la liste des villes du département
-    listeInfoDept = []
+    listeVilles = []
     # boucle qui parcours la liste "listeInfo"
-    for i in listeVilles:
+    for i in listeInfo:
         # test si la ville appartient au département
         if i[0] == numDept:
             # incrémentation de la variable nbVilles
             nbVilles += 1
             # ajout de la ville dans la liste des villes du département
-            listeInfoDept.append(i)
-            # création de la string a écrire dans le fichier
-            ligne = str(nbVilles) + " " + str(i[1]) + " " + "(" + str(i[0]) + ")" + "\n"
-            # écriture dans le fichier
-            with open("SO05.txt", "a", encoding="utf-8") as fichier:
-                fichier.write(ligne)
-    return nbVilles, listeInfoDept
-
-
-"""
-    A compléter
-"""
-
+            listeVilles.append(i)
+    # écriture dans le fichier
+    with open(f"villes_{numDept}.txt", "a", encoding="utf-8") as fichier:
+        for i in listeVilles:
+            fichier.write(str(i) + "\n")
+    return nbVilles, listeVilles
 
 # ================================================
 # Fonctions Utiles pour le Tri Bulle lié à la POPULATION
@@ -427,6 +425,8 @@ while fini == False:
     elif choix == '2':
         print("\n**** Nombre de Villes par Département *****")
         print("A compléter")
+        listeInfo = appelExtractionVilles()
+        extract_villes_NumDepart(listeInfo)
         #=====================================
         finiBis = False
         while finiBis == False:
