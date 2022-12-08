@@ -555,7 +555,10 @@ def dist_GEOdesique(ville1, ville2):
     lat2 = math.radians(ville2[9])
     lon2 = math.radians(ville2[8])
     R = 6371 # rayon de la terre en km
-    S=math.acos(math.sin(lat1)*math.sin(lat2)+math.cos(lat1)*math.cos(lat2)*math.cos(lon2-lon1))*R
+    if math.sin(lat1)*math.sin(lat2)+math.cos(lat1)*math.cos(lat2)*math.cos(lon2-lon1) >1:
+        S=0
+    else:
+        S=math.acos(math.sin(lat1)*math.sin(lat2)+math.cos(lat1)*math.cos(lat2)*math.cos(lon2-lon1))*R
     return S
 #===============================================================
 # ETAPE 5 : Parcours Ville1 ==> Ville2
@@ -584,52 +587,70 @@ def ensembleVilles(name, rayon, listeVilles):
 def parcoursVilles(vil1, vil2, listeRef, rayon):
     #distance ville 1 à ville 2
     distMin=dist_GEOdesique(vil1, vil2)
-    vilMin=vil1
-    listeVilles=[]
-    altmoyenne = (vil1[10]+vil2[10])/2
-    altmax = max(vil1[11], vil2[11])
-    error=0
-    popmax=0
-    rayonOrigine = rayon
-    while vilMin[1] != vil2[1]:
-        listeVillesRetenues = ensembleVilles(vilMin, rayon, listeRef)
-        popmax=0
-        # Recherche de la ville a un rayon de R km de vil1, le plus proche de vil2
-        for i in listeVillesRetenues:
-            popmax = max(popmax, i[5])
-        while popmax < 00:
-            rayon+=1
-            listeVillesRetenues = ensembleVilles(vilMin, rayon, listeRef)
-            for i in listeVillesRetenues:
-                popmax = max(popmax, i[5])
-        else:
-            rayon = rayonOrigine
-        for i in listeVillesRetenues:
-            if error==1 and dist_GEOdesique(vil2, i) < distMin and i[1] not in listeVilles and i[1] != vil2[1] and (i[10] <= altmax):
-                distMin = dist_GEOdesique(vil2, i)
+    #initialisation de la ville la plus proche
+    vilMin = vil1
+    #liste des villes du trajet
+    trajetVilles = []
+    #population max des villes plus proches
+    listepopMax = []
+    popMax = 0
+    #rayon de recherche des villes
+    rayonDepart = rayon
+    listerayon = []
+    while vilMin != vil2:
+        while popMax < 1000:
+            #liste des villes à parcourir
+            listeVilles = ensembleVilles(vilMin, rayon, listeRef)
+            for i in listeVilles:
+                if dist_GEOdesique(i, vil2) < distMin:
+                    listepopMax.append(i[5])
+            popMax = max(listepopMax)
+            rayon += 1
+        for i in listeVilles:
+            if (dist_GEOdesique(vil2, i) < distMin or i[5] == popMax) and i not in trajetVilles and i[1] != vil2[1]:
                 vilMin = i
-                error=0
-                print(vilMin[1])
-            elif dist_GEOdesique(vil2, i) < distMin  and i[1] not in listeVilles and i[1] != vil2[1] and (i[10] <= altmoyenne*1.5 or i[5] > 2000):
-                distMin = dist_GEOdesique(vil2, i)
-                vilMin = i
-                print(vilMin[1])
+                distMin = dist_GEOdesique(i, vil2)
             elif i[1] == vil2[1]:
                 vilMin = i
-            
-        if vilMin in listeVilles:
-            error=1
-            print("Erreur")
-            
-        listeVilles.append(vilMin)
-
+        if vilMin in trajetVilles:
+            rayon += 1
+        else:
+            listerayon.append(rayon)
+            rayon = rayonDepart
+            trajetVilles.append(vilMin)
+            print(vilMin[1])
+        popMax = 0
+        listeVilles = ensembleVilles(vilMin, rayon, listeRef)
+    return trajetVilles, listerayon
 #----------------------------------------------------------------------------------
 # On sauvegarde le trajet dans un fichier html pour l'afficher dans un navigateur
 #----------------------------------------------------------------------------------
-def map_trajet(villes_traversees):
-    """
-        A compléter
-    """
+def map_trajet(villes_traversees,listerayon):
+    lat = []
+    lon = []
+    ray = []
+    for i in range(len(villes_traversees)):
+        lat.append(villes_traversees[i][9])
+        lon.append(villes_traversees[i][8])
+        ray.append(listerayon[i])
+    coords = (46.539758, 2.430331)
+    map2 = folium.Map(location=coords, tiles='OpenStreetMap', zoom_start=6)
+    cm = branca.colormap.LinearColormap(['blue', 'red'], vmin=min(rayon), vmax=max(rayon))
+    #ajout de la couleur en fonction de la densité de population
+    map2.add_child(cm)
+    #boucle qui parcours la liste des latitudes, longitudes et densité de population des villes
+    for lati, lng, size, color in zip(lat, lon, ray, ray):
+        folium.CircleMarker(
+            location=[lati, lng],
+            radius=size,
+            color=cm(color),
+            fill=True,
+            fill_color=cm(color),
+            fill_opacity=0.6
+        ).add_to(map2)
+    #enregistrement de la carte
+    map2.save(outfile='trajet.html')
+    print("Carte enregistrée")
 
 #===============================================================
 # AFFICHE MENU
@@ -735,7 +756,8 @@ while fini == False:
         infoVille2=rechercheVille(ville2,listeInfo)
 
         print("\nPLus court chemine entre 2 villes")
-        parcoursVilles(infoVille1, infoVille2, listeInfo,7)
+        villes, rayon = parcoursVilles(infoVille1, infoVille2, listeInfo,7)
+        map_trajet(villes, rayon)
         print("*** Traitement terminé, Map réalisée ****")
     elif choix == '5':
         print("\nAppel de la fonction4\n")
