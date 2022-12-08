@@ -554,10 +554,7 @@ def dist_GEOdesique(ville1, ville2):
     lon1 = math.radians(ville1[8])
     lat2 = math.radians(ville2[9])
     lon2 = math.radians(ville2[8])
-    print(lat1)
-    print(lon1)
     R = 6371 # rayon de la terre en km
-
     S=math.acos(math.sin(lat1)*math.sin(lat2)+math.cos(lat1)*math.cos(lat2)*math.cos(lon2-lon1))*R
     return S
 #===============================================================
@@ -575,19 +572,56 @@ def ensembleVilles(name, rayon, listeVilles):
     :param listeVilles: liste de toutes les villes
     :return: listeVilles[i] : la ville recherchée
     """
-
-
-    """
-        A compléter
-    """
+    listeVillesRetenues = []
+    for i in listeVilles:
+        if dist_GEOdesique(name, i) <= rayon:
+            listeVillesRetenues.append(i)
+    return listeVillesRetenues
 
 #===================================================================
 # ETAPE 5 : Plus court chemin entre les 2 Villes vil1 et vil2
 #===================================================================
 def parcoursVilles(vil1, vil2, listeRef, rayon):
-    """
-        A compléter
-    """
+    #distance ville 1 à ville 2
+    distMin=dist_GEOdesique(vil1, vil2)
+    vilMin=vil1
+    listeVilles=[]
+    altmoyenne = (vil1[10]+vil2[10])/2
+    altmax = max(vil1[11], vil2[11])
+    error=0
+    popmax=0
+    rayonOrigine = rayon
+    while vilMin[1] != vil2[1]:
+        listeVillesRetenues = ensembleVilles(vilMin, rayon, listeRef)
+        popmax=0
+        # Recherche de la ville a un rayon de R km de vil1, le plus proche de vil2
+        for i in listeVillesRetenues:
+            popmax = max(popmax, i[5])
+        while popmax < 00:
+            rayon+=1
+            listeVillesRetenues = ensembleVilles(vilMin, rayon, listeRef)
+            for i in listeVillesRetenues:
+                popmax = max(popmax, i[5])
+        else:
+            rayon = rayonOrigine
+        for i in listeVillesRetenues:
+            if error==1 and dist_GEOdesique(vil2, i) < distMin and i[1] not in listeVilles and i[1] != vil2[1] and (i[10] <= altmax):
+                distMin = dist_GEOdesique(vil2, i)
+                vilMin = i
+                error=0
+                print(vilMin[1])
+            elif dist_GEOdesique(vil2, i) < distMin  and i[1] not in listeVilles and i[1] != vil2[1] and (i[10] <= altmoyenne*1.5 or i[5] > 2000):
+                distMin = dist_GEOdesique(vil2, i)
+                vilMin = i
+                print(vilMin[1])
+            elif i[1] == vil2[1]:
+                vilMin = i
+            
+        if vilMin in listeVilles:
+            error=1
+            print("Erreur")
+            
+        listeVilles.append(vilMin)
 
 #----------------------------------------------------------------------------------
 # On sauvegarde le trajet dans un fichier html pour l'afficher dans un navigateur
@@ -694,10 +728,14 @@ while fini == False:
         distanceGeo=dist_GEOdesique(infoVille1, infoVille2)
         print("La distance Géodésique entre ", ville1, "et", ville2, "est de", distanceGeo, "km")
     elif choix == '4':
+        listeInfo = appelExtractionVilles()
+        ville1=input("Entrer le nom de la première ville en MAJUSCULE : ")
+        infoVille1=rechercheVille(ville1,listeInfo)
+        ville2=input("Entrer le nom de la deuxième ville en MAJUSCULE : ")
+        infoVille2=rechercheVille(ville2,listeInfo)
+
         print("\nPLus court chemine entre 2 villes")
-        """
-            A compléter
-        """
+        parcoursVilles(infoVille1, infoVille2, listeInfo,7)
         print("*** Traitement terminé, Map réalisée ****")
     elif choix == '5':
         print("\nAppel de la fonction4\n")
