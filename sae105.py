@@ -584,7 +584,7 @@ def ensembleVilles(name, rayon, listeVilles):
 #===================================================================
 # ETAPE 5 : Plus court chemin entre les 2 Villes vil1 et vil2
 #===================================================================
-def parcoursVilles(vil1, vil2, listeRef, rayon):
+def parcoursVilles(vil1, vil2, listeRef, rayon, methode):
     #distance ville 1 à ville 2
     distMin=dist_GEOdesique(vil1, vil2)
     #initialisation de la ville la plus proche de la ville 2
@@ -597,6 +597,10 @@ def parcoursVilles(vil1, vil2, listeRef, rayon):
     rayonDepart = rayon
     #liste des rayons de recherche
     listerayon = [rayon]
+    if methode == "population":
+            methode = 0
+    else:
+            methode = 1
     #recherche tant que la ville la plus proche de la ville 2 n'est pas la ville 2
     while vilMin != vil2:
         #liste des populations des villes à parcourir
@@ -621,15 +625,26 @@ def parcoursVilles(vil1, vil2, listeRef, rayon):
         #parcours toute les villes proche de la dernière ville
         for i in listeVilles:
             #recherche de la ville avec la plus proche de la ville 2 ou celle avec la plus grande population
-            if (dist_GEOdesique(vil2, i) < distMin or i[5] == popMax) and i not in trajetVilles and i[1] != vil2[1]:
-                #définit la ville la plus proche de la ville 2
-                vilMin = i
-                #définit la distance de la ville la plus proche de la ville 2
-                distMin = dist_GEOdesique(i, vil2)
-            #si la ville la plus proche de la ville 2 est la ville 2
-            elif i[1] == vil2[1]:
-                #condition d'arrêt de la boucle while
-                vilMin = i
+            if methode == 1:
+                if dist_GEOdesique(vil2, i) < distMin and i not in trajetVilles and i[1] != vil2[1]:
+                    #définit la ville la plus proche de la ville 2
+                    vilMin = i
+                    #définit la distance de la ville la plus proche de la ville 2
+                    distMin = dist_GEOdesique(i, vil2)
+                #si la ville la plus proche de la ville 2 est la ville 2
+                elif i[1] == vil2[1]:
+                    #condition d'arrêt de la boucle while
+                    vilMin = i
+            else:
+                if (dist_GEOdesique(vil2, i) < distMin or i[5] == popMax) and i not in trajetVilles and i[1] != vil2[1]:
+                    #définit la ville la plus proche de la ville 2
+                    vilMin = i
+                    #définit la distance de la ville la plus proche de la ville 2
+                    distMin = dist_GEOdesique(i, vil2)
+                #si la ville la plus proche de la ville 2 est la ville 2
+                elif i[1] == vil2[1]:
+                    #condition d'arrêt de la boucle while
+                    vilMin = i
         #si la ville la plus proche de la ville 2 est pas la liste des villes du trajet
         if vilMin in trajetVilles:
             #augmente le rayon de recherche des villes
@@ -775,9 +790,14 @@ while fini == False:
         infoVille1=rechercheVille(ville1,listeInfo)
         ville2=input("Entrer le nom de la deuxième ville en MAJUSCULE : ")
         infoVille2=rechercheVille(ville2,listeInfo)
-        zone_recherche=int(input("Entrer le rayon de recherche en km : "))
+        zone_recherche=input("Entrer le rayon de recherche en km (défaut : 15km) : ")
+        if zone_recherche == "":
+            zone_recherche = 15
+        else:
+            zone_recherche = int(zone_recherche)
+        typeitineraire=input("Entrer le type d'itinéraire (défaut : direct, ou population) : ")
         print("\nPLus court chemine entre 2 villes")
-        villes, rayon = parcoursVilles(infoVille1, infoVille2, listeInfo,zone_recherche)
+        villes, rayon = parcoursVilles(infoVille1, infoVille2, listeInfo,zone_recherche, typeitineraire)
         map_trajet(villes, rayon)
         print("*** Traitement terminé, Map réalisée ****")
     elif choix == '5':
