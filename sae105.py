@@ -103,7 +103,7 @@ def extract_info_villes(uneListe):
 def appelNombre_Villes_Indicatif(indTel, unelisteInfo):
     """
     Procédure qui compte le nombre de villes en fonction de l'indicatif téléphonique
-    :param indTel: indicatif téléphonique
+    :param indTel: indicatif téléphonique en int
     :param unelisteInfo: liste des villes
     """
     #définition de la variable "listeDept" en fonction de l'indicatif téléphonique
@@ -209,7 +209,7 @@ def extract_villes_NumDepart(numDept,listeInfo):
     en fonction du numéro du Département
 
     :param numDept: numéro du département
-    :param listeVilles: liste des noms de villes
+    :param listeInfo: liste des noms de villes
     :return: nbVilles = nombre de villes du département
     """
     # initialisation de la variable nbVilles à 0
@@ -288,7 +288,6 @@ def mapTenVilles(maxPop,minPop):
     """
     :param maxPop: fichier contenant les 5 villes ayant la population MAX
     :param minPop: fichier contenant les 5 villes ayant la population MIN
-    :return:
     """
     numDept=12
     #récupérer le contenue des fichiers avec les 5 villes ayant la population MAX et MIN
@@ -438,7 +437,7 @@ def MinMax5Alt_Dept(lstVillesDepart):
     numDept=str(VillesDept[0][0])
     print("5 villes ayant la plus faible différence d'altitude dans le département :")
     #ouverture du fichier contenant les 5 villes ayant la plus faible différence d'altitude dans le département
-    with open(f"Top5Alt_{VillesDept[0][0]}.txt", "w", encoding="utf-8") as fichier:
+    with open(f"Top5Alt_{numDept}.txt", "w", encoding="utf-8") as fichier:
         #boucle qui parcours la liste des 5 villes ayant la plus faible différence d'altitude dans le département
         for i in range(0,5):
             #affichage des 5 villes ayant la plus faible différence d'altitude dans le département
@@ -447,7 +446,7 @@ def MinMax5Alt_Dept(lstVillesDepart):
             fichier.write(numDept + "," + str(VillesDept[i][1]) + "," + str(VillesDept[i][9]) + "," + str(VillesDept[i][8]) + "," + str(VillesDept[i][11]-VillesDept[i][10])+"\n")
     print("5 villes ayant la plus forte différence d'altitude dans le département :")
     #ouverture du fichier contenant les 5 villes ayant la plus forte différence d'altitude dans le département
-    with open(f"Min5Alt_{VillesDept[0][0]}.txt", "w", encoding="utf-8") as fichier:
+    with open(f"Min5Alt_{numDept}.txt", "w", encoding="utf-8") as fichier:
         #boucle qui parcours la liste des 5 villes ayant la plus forte différence d'altitude dans le département
         for i in range(len(VillesDept)-1,len(VillesDept)-6,-1):
             #affichage des 5 villes ayant la plus forte différence d'altitude dans le département
@@ -536,13 +535,38 @@ def traceHistoVilles(numDept,lstVillesDepart):
     plt.xlabel("Population")
     plt.ylabel("Nombre de villes")
     plt.show()
+    moyenne=0
+    somme=0
+    total=0
+    #================================================
+    #calcul de la moyenne de la population des villes
+    #================================================
+    #somme des populations des villes
+    for i in popVilles:
+        total+=i
+    #calcul de la moyenne
+    moyenne=total/len(popVilles)
+    #affichage de la moyenne
+    print(f"La moyenne de la population des villes du département {numDept} est de {moyenne} habitants")
+    #==================================================
+    #calcul de l'écart type de la population des villes
+    #==================================================
+    #somme des carrés des écarts à la moyenne
+    for i in popVilles:
+        somme+=(i-moyenne)**2
+    #calcul de l'écart type
+    ecartType=math.sqrt(somme/len(popVilles))
+    #affichage de l'écart type
+    print(f"L'écart type de la population des villes du département {numDept} est de {ecartType} habitants")
 
 #====================================================================
 # Distance EUCLIDIENNE entre 2 villes (en km)
 #====================================================================
 def dist_Euclidienne(ville1, ville2):
-# Méthode par le calcul de Pythagore
-    return math.sqrt((ville1[8]-ville2[8])**2 + (ville1[9]-ville2[9])**2)*111.32
+    #Méthode par le calcul de Pythagore
+    #Multiplication par 111.32 pour convertir les degrés en km
+    distance = math.sqrt((ville1[8]-ville2[8])**2 + (ville1[9]-ville2[9])**2)*111.32
+    return distance
 
 #====================================================================
 # Distance GEODESIQUE (surface de la terre) entre 2 villes (en km)
