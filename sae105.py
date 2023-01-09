@@ -112,7 +112,7 @@ def appelNombre_Villes_Indicatif(indTel, unelisteInfo):
         listeDept = [75, 77, 78, 91, 92, 93, 94, 95] 
     elif indTel == 2:
         #liste des département avec l'indicatif 02
-        listeDept = [14,18,22,27,28,29,35,36,37,41,45,49,50,53,56,72,85,974,976] 
+        listeDept = [14,18,22,27,28,29,35,36,37,41,45,49,50,53,56,72,85,974,976]
     elif indTel == 3:
         #liste des département avec l'indicatif 03
         listeDept = [2,8,10,21,25,39,51,52,54,55,57,58,59,60,62,67,68,70,71,80,88,89,90]
@@ -193,10 +193,11 @@ def rechercheVille(name,listeVilles):
     """
     #boucle qui parcours la liste "listeVilles"
     for i in range(len(listeVilles)):
-        #test si la ville recherchée est dans la liste
-        if listeVilles[i][1] == name:
+        #test si la ville recherchée est dans la liste, et test en enlevant les tirets
+        if listeVilles[i][1] == name or listeVilles[i][1].replace("-", " ") == name:
             #retourne la ville recherchée
-            return listeVilles[i]
+            ville=listeVilles[i]
+            return ville
     #retourne "ville non trouvée" si la ville n'est pas dans la liste
     print("ville non trouvée")
 
@@ -307,8 +308,10 @@ def mapTenVilles(maxPop,minPop):
     for i in minPopultemp:
         #découpage de la chaine de caractère pour en faire une liste
         minPopul.append(i.split(','))
-    
+
+    #====================
     #création de la carte
+    #====================
 
     #initialisation de la liste des coordonnées des villes
     lon=[]
@@ -527,21 +530,26 @@ def mapTenAlt(maxAlt, minAlt):
 # Construction de l'HISTOGRAMME
 #===================================================================
 def traceHistoVilles(numDept,lstVillesDepart):
+    #on créer la list popVilles qui contiendra la population des villes en 2010
     popVilles = []
+    #on parcours la liste des villes du département et on ajoute a notre liste popVilles la population de chaque ville
     for i in lstVillesDepart:
         popVilles.append(i[3])
+    #on créer l'histogramme avec les valeurs de population des villes
     plt.hist(popVilles,bins=100, color='blue', edgecolor='red')
+    #on ajoute les titres et les labels
     plt.title(f"Dépt {numDept} nombre de villes en fonction de leur population")
     plt.xlabel("Population")
     plt.ylabel("Nombre de villes")
+    #on affiche l'histogramme
     plt.show()
-    moyenne=0
-    somme=0
-    total=0
     #================================================
     #calcul de la moyenne de la population des villes
     #================================================
-    #somme des populations des villes
+    #définition des variables
+    total=0
+    moyenne=0
+    #total des populations des villes
     for i in popVilles:
         total+=i
     #calcul de la moyenne
@@ -551,6 +559,8 @@ def traceHistoVilles(numDept,lstVillesDepart):
     #==================================================
     #calcul de l'écart type de la population des villes
     #==================================================
+    #définition des variables
+    somme=0
     #somme des carrés des écarts à la moyenne
     for i in popVilles:
         somme+=(i-moyenne)**2
@@ -573,15 +583,18 @@ def dist_Euclidienne(ville1, ville2):
 # Formule de Haversine
 #====================================================================
 def dist_GEOdesique(ville1, ville2):
-# calcul par la méthode HAVERSINE
+    # calcul par la méthode HAVERSINE
+    #conversion des coordonnées en radians
     lat1 = math.radians(ville1[9])
     lon1 = math.radians(ville1[8])
     lat2 = math.radians(ville2[9])
     lon2 = math.radians(ville2[8])
     R = 6371 # rayon de la terre en km
+    #vérification de la validité des coordonnées
     if math.sin(lat1)*math.sin(lat2)+math.cos(lat1)*math.cos(lat2)*math.cos(lon2-lon1) >1:
         S=0
     else:
+        #calcul de la distance géodésique entre 2 villes
         S=math.acos(math.sin(lat1)*math.sin(lat2)+math.cos(lat1)*math.cos(lat2)*math.cos(lon2-lon1))*R
     return S
 #===============================================================
@@ -622,9 +635,11 @@ def parcoursVilles(vil1, vil2, listeRef, rayon, methode):
     #liste des rayons de recherche
     listerayon = [rayon]
     if methode == "population":
-            methode = 0
+        methode = 0
+        print("Méthode de recherche par population")
     else:
-            methode = 1
+        methode = 1
+        print("Méthode de recherche par distance")
     #recherche tant que la ville la plus proche de la ville 2 n'est pas la ville 2
     while vilMin != vil2:
         #liste des populations des villes à parcourir
@@ -669,11 +684,12 @@ def parcoursVilles(vil1, vil2, listeRef, rayon, methode):
                 elif i[1] == vil2[1]:
                     #condition d'arrêt de la boucle while
                     vilMin = i
-        #si la ville la plus proche de la ville 2 est pas la liste des villes du trajet
+        #si la ville la plus proche de la ville 2 à déja été prise 
         if vilMin in trajetVilles:
             #augmente le rayon de recherche des villes
             rayon += 1
-            print("ville déjà parcourue")
+            print(f"Nouveau rayon : {rayon}km")
+        #sinon on ajoute la ville la plus proche de la ville 2 dans la liste des villes parcourues
         else:
             listerayon.append(rayon)
             rayon = rayonDepart
@@ -686,6 +702,7 @@ def parcoursVilles(vil1, vil2, listeRef, rayon, methode):
 # On sauvegarde le trajet dans un fichier html pour l'afficher dans un navigateur
 #----------------------------------------------------------------------------------
 def map_trajet(villes_traversees,listerayon):
+    #création des list pour mettre la latitude, longitude et le rayon de recherche utilisé
     lat = []
     lon = []
     ray = []
@@ -710,7 +727,7 @@ def map_trajet(villes_traversees,listerayon):
         ).add_to(map2)
     #enregistrement de la carte
     map2.save(outfile=f"trajet_{villes_traversees[0][1]}_{villes_traversees[len(villes_traversees)-1][1]}_{listerayon[0]}.html")
-    print("Carte enregistrée")
+    print(f"Carte enregistrée : trajet_{villes_traversees[0][1]}_{villes_traversees[len(villes_traversees)-1][1]}_{listerayon[0]}.html")
 
 #===============================================================
 # AFFICHE MENU
